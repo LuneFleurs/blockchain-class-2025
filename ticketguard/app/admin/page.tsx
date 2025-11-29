@@ -162,7 +162,7 @@ export default function AdminPage() {
       description: event.description || '',
       imageUrl: event.imageUrl || '',
       totalTickets: event.totalTickets.toString(),
-      contractAddress: event.contractAddress,
+      contractAddress: event.contractAddress || '',
     });
 
     setShowEditDialog(true);
