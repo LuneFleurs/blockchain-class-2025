@@ -1,0 +1,21 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Orange background -->
+  <rect width="64" height="64" rx="8" fill="#ea7c3f"/>
+
+  <!-- White ticket icon -->
+  <g transform="translate(16, 20)">
+    <!-- Main ticket body -->
+    <rect x="0" y="0" width="32" height="24" rx="2" fill="white"/>
+
+    <!-- Left notch -->
+    <circle cx="0" cy="12" r="3" fill="#ea7c3f"/>
+
+    <!-- Right notch -->
+    <circle cx="32" cy="12" r="3" fill="#ea7c3f"/>
+
+    <!-- Dashed line in the middle -->
+    <line x1="16" y1="4" x2="16" y2="8" stroke="#ea7c3f" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="16" y1="10" x2="16" y2="14" stroke="#ea7c3f" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="16" y1="16" x2="16" y2="20" stroke="#ea7c3f" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+</svg>
