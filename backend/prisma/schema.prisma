@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User: 서비스 사용자
+model User {
+  id                  String     @id @default(uuid())
+  email               String     @unique
+  password            String?    // 해시된 비밀번호 (Google 로그인 시 null)
+  provider            String?    // 'credentials' 또는 'google'
+  walletAddress       String     // 사용자의 블록체인 지갑 주소
+  encryptedPrivateKey String     // 암호화된 개인키 (서버가 관리)
+  tickets             Ticket[]
+  waitlists           Waitlist[]
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+}
+
+// Event: 공연 정보
+model Event {
+  id              String     @id @default(uuid())
+  title           String
+  date            DateTime
+  price           Int        // 정가
+  location        String?    // 공연 장소
+  description     String?    // 공연 설명
+  imageUrl        String?    // 공연 이미지 URL
+  totalTickets    Int        @default(100) // 전체 티켓 수
+  contractAddress String     // 해당 공연 NFT 컨트랙트 주소
+  tickets         Ticket[]
+  waitlists       Waitlist[]
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+// Ticket: 발급된 NFT 티켓 정보
+model Ticket {
+  id           String   @id @default(uuid())
+  tokenId      Int      // 블록체인 상의 Token ID
+  status       String   // 'OWNED', 'REFUNDED', 'RESALE_WAITING'
+  purchaseDate DateTime @default(now()) // 구매 날짜
+  owner        User?    @relation(fields: [ownerId], references: [id])
+  ownerId      String?
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId      String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Waitlist: 대기열 정보
+model Waitlist {
+  id        String   @id @default(uuid())
+  status    String   @default("WAITING") // 'WAITING', 'FULFILLED', 'CANCELLED'
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, eventId]) // 한 사용자는 같은 이벤트에 한 번만 대기 가능
+  @@index([eventId, status]) // 대기열 조회 최적화
+}
