@@ -50,3 +50,4 @@ typechain-types/
 
 # md files
 *.md
+!README.md
