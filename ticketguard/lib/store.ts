@@ -36,11 +36,18 @@ export const useAuthStore = create<AuthState>()(
       login: async (email: string, password: string) => {
         try {
           const data = await authAPI.login(email, password);
+          console.log('[Store] Backend login response:', data);
+          console.log('[Store] User data from backend:', data.user);
+          console.log('[Store] Role from backend:', data.user?.role);
+
           const user: User = {
             id: data.user.id,
             email: data.user.email,
             walletAddress: data.user.walletAddress,
+            role: data.user.role,
           };
+
+          console.log('[Store] User object to save:', user);
 
           set({
             user,
@@ -59,6 +66,7 @@ export const useAuthStore = create<AuthState>()(
             id: data.user.id,
             email: data.user.email,
             walletAddress: data.user.walletAddress,
+            role: data.user.role,
           };
 
           set({

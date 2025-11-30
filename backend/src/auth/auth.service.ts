@@ -19,7 +19,8 @@ export class AuthService {
    * 1. 이메일 중복 확인
    * 2. 비밀번호 해싱 (credentials 로그인인 경우)
    * 3. 블록체인 지갑 생성
-   * 4. 사용자 DB 저장
+   * 4. 관리자 권한 확인 (환경 변수 화이트리스트)
+   * 5. 사용자 DB 저장
    */
   async register(registerDto: RegisterDto) {
     const { email, password, provider = 'credentials' } = registerDto;
@@ -35,6 +36,7 @@ export class AuthService {
         const token = this.jwtService.sign({
           sub: existingUser.id,
           email: existingUser.email,
+          role: existingUser.role,
         });
 
         return {
@@ -43,6 +45,7 @@ export class AuthService {
             email: existingUser.email,
             walletAddress: existingUser.walletAddress,
             provider: existingUser.provider,
+            role: existingUser.role,
             createdAt: existingUser.createdAt,
           },
           accessToken: token,
@@ -61,12 +64,17 @@ export class AuthService {
     // 블록체인 지갑 생성
     const wallet = this.blockchainService.createWallet();
 
+    // 관리자 권한 확인
+    const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
+    const role = adminEmails.includes(email) ? 'ADMIN' : 'USER';
+
     // 사용자 생성
     const user = await this.prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         provider,
+        role,
         walletAddress: wallet.address,
         encryptedPrivateKey: wallet.encryptedPrivateKey,
       },
@@ -75,6 +83,7 @@ export class AuthService {
         email: true,
         walletAddress: true,
         provider: true,
+        role: true,
         createdAt: true,
       },
     });
@@ -83,6 +92,7 @@ export class AuthService {
     const token = this.jwtService.sign({
       sub: user.id,
       email: user.email,
+      role: user.role,
     });
 
     return {
@@ -95,7 +105,7 @@ export class AuthService {
    * 로그인
    * 1. 이메일로 사용자 조회
    * 2. 비밀번호 검증
-   * 3. JWT 토큰 발급
+   * 3. JWT 토큰 발급 (role 포함)
    */
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
@@ -118,6 +128,7 @@ export class AuthService {
     const token = this.jwtService.sign({
       sub: user.id,
       email: user.email,
+      role: user.role,
     });
 
     return {
@@ -126,6 +137,7 @@ export class AuthService {
         email: user.email,
         walletAddress: user.walletAddress,
         provider: user.provider,
+        role: user.role,
       },
       accessToken: token,
     };
@@ -142,6 +154,7 @@ export class AuthService {
         email: true,
         walletAddress: true,
         provider: true,
+        role: true,
       },
     });
 

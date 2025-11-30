@@ -16,6 +16,7 @@ model User {
   email               String     @unique
   password            String?    // 해시된 비밀번호 (Google 로그인 시 null)
   provider            String?    // 'credentials' 또는 'google'
+  role                String     @default("USER") // 'USER' 또는 'ADMIN'
   walletAddress       String     // 사용자의 블록체인 지갑 주소
   encryptedPrivateKey String     // 암호화된 개인키 (서버가 관리)
   tickets             Ticket[]

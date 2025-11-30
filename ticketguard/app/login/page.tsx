@@ -35,7 +35,9 @@ export default function LoginPage() {
         const authStorage = localStorage.getItem('auth-storage');
         console.log('After login - localStorage auth-storage:', authStorage);
         if (authStorage) {
-          console.log('Parsed:', JSON.parse(authStorage));
+          const parsed = JSON.parse(authStorage);
+          console.log('Parsed:', parsed);
+          console.log('User role:', parsed?.state?.user?.role);
         }
       }, 100);
 

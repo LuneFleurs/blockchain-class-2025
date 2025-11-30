@@ -37,6 +37,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id = user.id;
         token.walletAddress = (user as any).walletAddress;
+        token.role = (user as any).role;
 
         // If signing in with Google, register the user in the backend
         if (account?.provider === "google" && user.email) {
@@ -65,6 +66,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               // Store the backend user data
               token.id = data.user.id;
               token.walletAddress = data.user.walletAddress;
+              token.role = data.user.role;
               token.accessToken = data.accessToken;
             } else if (response.status === 409) {
               // User already exists, try to login
@@ -86,11 +88,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         hasId: !!token.id,
         hasWallet: !!token.walletAddress,
         hasToken: !!token.accessToken,
+        role: token.role,
       });
 
       if (session.user) {
         (session.user as any).id = token.id;
         (session.user as any).walletAddress = token.walletAddress;
+        (session.user as any).role = token.role;
         (session.user as any).accessToken = token.accessToken;
       }
       return session;

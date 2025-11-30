@@ -2,13 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Calendar, MapPin, Ticket, Loader2, Trash2, Edit } from 'lucide-react';
+import { Plus, Calendar, MapPin, Ticket, Loader2, Trash2, Edit, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useAuthStore, useLanguageStore } from '@/lib/store';
 import { eventsAPI } from '@/lib/api';
 import { Event } from '@/lib/types';
@@ -26,6 +35,7 @@ export default function AdminPage() {
   const [creating, setCreating] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [showAccessDenied, setShowAccessDenied] = useState(false);
 
   // Zustand persist hydration 처리
   const authStore = useAuthStore();
@@ -51,6 +61,7 @@ export default function AdminPage() {
       isHydrated,
       isAuthenticated,
       user,
+      role: user?.role,
       authStore: {
         _hasHydrated: authStore._hasHydrated,
         isAuthenticated: authStore.isAuthenticated,
@@ -71,10 +82,18 @@ export default function AdminPage() {
       return;
     }
 
-    // 인증된 경우 공연 목록 가져오기
-    console.log('[Admin Page] Authenticated, fetching events');
+    // 관리자가 아닌 경우 경고 다이얼로그 표시
+    if (user?.role !== 'ADMIN') {
+      console.log('[Admin Page] Not admin, showing access denied dialog');
+      setShowAccessDenied(true);
+      setLoading(false); // 로딩 상태 해제
+      return;
+    }
+
+    // 인증되고 관리자인 경우 공연 목록 가져오기
+    console.log('[Admin Page] Admin authenticated, fetching events');
     fetchEvents();
-  }, [isHydrated, isAuthenticated]);
+  }, [isHydrated, isAuthenticated, user?.role]);
 
   const fetchEvents = async () => {
     try {
@@ -287,8 +306,36 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <>
+      {/* 접근 거부 다이얼로그 */}
+      <AlertDialog open={showAccessDenied} onOpenChange={setShowAccessDenied}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="h-6 w-6 text-destructive" />
+              <AlertDialogTitle>
+                {language === 'ko' ? '접근 권한 없음' : 'Access Denied'}
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription>
+              {language === 'ko'
+                ? '관리자 권한이 필요합니다. 관리자 계정으로 로그인해주세요.'
+                : 'Admin access required. Please login with an admin account.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => {
+              setShowAccessDenied(false);
+              router.push('/');
+            }}>
+              {language === 'ko' ? '확인' : 'OK'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <div className="min-h-screen bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* 헤더 */}
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -712,7 +759,8 @@ export default function AdminPage() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

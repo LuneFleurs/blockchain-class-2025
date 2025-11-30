@@ -99,6 +99,33 @@ blockchain-project/
 - 대기열 관리
 - 티켓 발급 내역 확인
 
+## 👑 관리자 권한 설정
+
+### 환경 변수 설정
+
+`backend/.env` 파일에 관리자 이메일 추가:
+
+```bash
+# 단일 관리자
+ADMIN_EMAILS="admin@example.com"
+
+# 여러 관리자 (쉼표로 구분, 공백 없이)
+ADMIN_EMAILS="admin1@example.com,admin2@example.com"
+```
+
+### 작동 방식
+
+- 회원가입/로그인 시 화이트리스트에 있는 이메일은 자동으로 `role = 'ADMIN'` 부여
+- DB의 `User.role` 필드로 관리
+- JWT 토큰에 role 포함
+
+### 권한 구분
+
+| 역할 | 권한 |
+|------|------|
+| **USER** | 티켓 구매/환불, 내 티켓 조회 |
+| **ADMIN** | 모든 USER 권한 + 공연 등록/수정/삭제 + `/admin` 페이지 접근 |
+
 ### 블록체인
 - NFT 티켓 발행 (On-demand Minting)
 - P2P 전송 차단

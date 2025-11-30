@@ -2,6 +2,7 @@ export interface User {
   id: string;
   email: string;
   walletAddress: string;
+  role?: string;
 }
 
 export interface Event {

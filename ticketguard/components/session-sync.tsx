@@ -23,6 +23,7 @@ export function SessionSync() {
             id: user.id,
             email: user.email || '',
             walletAddress: user.walletAddress,
+            role: user.role,
           },
           accessToken: user.accessToken,
         });
