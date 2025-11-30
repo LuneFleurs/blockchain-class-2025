@@ -19,6 +19,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "TicketGuard - Scalping-Free NFT Ticketing",
   description: "Buy and sell event tickets securely with blockchain technology. No scalping, no fraud.",
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({
